@@ -1,3 +1,4 @@
+(The project was renamed from IOTG(insights-on-the-go) to Elastiviz)
 # Elastiviz - From Question to Chart in a Single Quote
 
 **Elastiviz** is an AI-powered, mobile-first observability platform designed to bridge the gap between complex infrastructure data and human intent. Instead of building static dashboards or writing complex query strings, Elastiviz allows you to ask questions in plain English and see the answers rendered instantly as interactive, real-time visualizations.
