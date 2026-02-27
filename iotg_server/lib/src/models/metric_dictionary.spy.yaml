@@ -1,0 +1,20 @@
+### A single entry in the generated metric dictionary.
+### Maps an abstract metric concept (e.g. "cpu") to an ECS field path.
+class: MetricDictionary
+table: metric_dictionary
+fields:
+  ### Abstract metric category: cpu, memory, network, disk, etc.
+  category: String
+  ### Entity type this metric applies to: pod, node, service
+  entityType: String
+  ### The source dataset (e.g. "kubernetes.container")
+  dataset: String
+  ### The full ECS field path
+  fieldPath: String
+  ### Measurement unit: %, bytes, cores, etc.
+  unit: String
+
+indexes:
+  metric_dict_category_entity_idx:
+    fields: category, entityType
+    unique: true

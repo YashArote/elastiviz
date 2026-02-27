@@ -1,0 +1,14 @@
+### Persisted result for a saved observability query.
+class: ObservabilityResult
+table: observability_result
+fields:
+  ### FK to the ObservabilityQuery that produced this result
+  queryId: int
+  ### Full chart response JSON (series, anomalies)
+  chartJson: String
+  ### Plain text explanation from the Explanation Agent
+  explanation: String
+  ### Whether anomalies were detected
+  hasAnomalies: bool
+  ### When this result was stored
+  createdAt: DateTime

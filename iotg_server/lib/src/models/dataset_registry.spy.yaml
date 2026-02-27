@@ -1,0 +1,16 @@
+### Represents a discovered Elasticsearch data stream / dataset.
+class: DatasetRegistry
+table: dataset_registry
+fields:
+  ### The dataset name, e.g. "kubernetes.container"
+  name: String
+  ### The index pattern used to query, e.g. "metrics-kubernetes.container*"
+  indexPattern: String
+  ### Either "metrics" or "logs"
+  dataType: String
+  ### Timestamp of the last successful discovery
+  lastSeen: DateTime
+
+indexes:
+  dataset_registry_name_idx:
+    fields: name

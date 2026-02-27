@@ -1,0 +1,47 @@
+# Dart/Flutter
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.metadata
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Android
+.gradle/
+local.properties
+*.keystore
+*.jks
+app/debug/
+app/profile/
+app/release/
+
+# iOS
+**/ios/Flutter/.last_build_id
+**/ios/Pods/
+*.lock
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+**/ios/Runner/GeneratedPluginRegistrant.h
+**/ios/Runner/GeneratedPluginRegistrant.m
+
+# Serverpod / Config
+**/config/passwords.yaml
+**/config/firebase_service_account_key.json
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.history
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log

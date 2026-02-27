@@ -1,0 +1,11 @@
+### A single math-detected anomaly point within a metric timeseries.
+class: AnomalyEntry
+fields:
+  ### ISO8601 timestamp of the anomaly
+  timestamp: String
+  ### The metric concept (cpu, memory, etc.)
+  metric: String
+  ### Severity: low, medium, high
+  severity: String
+  ### Human-readable reason (e.g. "z-score 3.7")
+  reason: String

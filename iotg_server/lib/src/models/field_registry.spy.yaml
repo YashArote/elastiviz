@@ -1,0 +1,19 @@
+### Raw ECS field discovered in a specific dataset.
+class: FieldRegistry
+table: field_registry
+fields:
+  ### The dataset this field belongs to (e.g. "kubernetes.container")
+  dataset: String
+  ### The full ECS field path (e.g. "kubernetes.container.cpu.usage.node.pct")
+  fieldPath: String
+  ### Elasticsearch data type (double, long, keyword, date, etc.)
+  fieldType: String
+  ### Whether this field is numeric (double / long / float)
+  isNumeric: bool
+  ### Whether this field is suitable for timeseries charting
+  isTimeseries: bool
+
+indexes:
+  field_registry_path_idx:
+    fields: dataset, fieldPath
+    unique: true

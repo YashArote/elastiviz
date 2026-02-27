@@ -1,0 +1,9 @@
+### The capability registry — the only schema the agent runtime can see.
+### Stored as a JSON snapshot updated on every ingestion cycle.
+class: CapabilityRegistry
+table: capability_registry
+fields:
+  ### JSON string: {entities: {pod: {metrics:[], logs:bool, anomaly_detection:bool}}}
+  registryJson: String
+  ### Timestamp of when this snapshot was last refreshed
+  refreshedAt: DateTime

@@ -1,0 +1,15 @@
+### A single response message returned from the observability pipeline.
+### Used as the wire format to Flutter.
+class: ChatResponse
+fields:
+  ### "success" or "error"
+  status: String
+  ### The natural language explanation (or error message)
+  explanation: String
+  ### JSON-encoded ChartData (may be null if error or no data)
+  chartJson: String?
+  ### Query ID for replay (null if not persisted)
+  queryId: int?
+  ### Elastic Agent Builder conversation ID — pass back on next query
+  ### for multi-turn memory (remembers entity, prior context etc.)
+  conversationId: String?

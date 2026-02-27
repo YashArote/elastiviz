@@ -1,0 +1,15 @@
+### A persisted record of a user observability query.
+### Used for save/replay functionality.
+class: ObservabilityQuery
+table: observability_query
+fields:
+  ### The raw natural-language query from the user
+  userQuery: String
+  ### JSON of the IntentResult from the Intent Agent
+  intentJson: String
+  ### JSON of the ExecutionPlan from the Planning Agent
+  planJson: String
+  ### The compiled ES|QL query string
+  esqlQuery: String
+  ### When this query was created
+  createdAt: DateTime

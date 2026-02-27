@@ -1,0 +1,82 @@
+# Elastiviz - From Question to Chart in a Single Quote
+
+**Elastiviz** is an AI-powered, mobile-first observability platform designed to bridge the gap between complex infrastructure data and human intent. Instead of building static dashboards or writing complex query strings, Elastiviz allows you to ask questions in plain English and see the answers rendered instantly as interactive, real-time visualizations.
+
+## 🚀 The Core Proposition
+
+*   **Natural Language to Visuals:** Translate intent—like *"Show me pods consuming CPU for last 2 days"*—directly into optimized ES|QL queries and rich charts.
+*   **Mobile-First Observability:** Built for the modern engineer on the move. Troubleshoot and monitor your K8s environment from your phone, not just your desk.
+*   **Intelligent Reasoning:** Powered by a Elastic agent builder and custom MCP (Model Context Protocol) engine that manages multi-step investigative reasoning and automatic schema discovery.
+*   **Premium UX:** Flutter interface designed for high-impact visual clarity and smooth interaction.
+
+## 🏗️ Architecture
+
+![Elastiviz Architecture Placeholder](docs/architecture.png)
+*Architecture: Flutter Frontend <-> Serverpod Backend <-> Elasticsearch (ES|QL) / Postgres / Redis*
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Flutter (Mobile & Web)
+- **Backend:** Serverpod (Dart), PostgreSQL, Redis
+- **Data Store:** Elastic Serverless Observability Project(Kubernetes Integration)
+
+## 🚦 Getting Started
+
+### Prerequisites
+
+- [Flutter SDK](https://docs.flutter.dev/get-started/install)
+- [Dart SDK](https://dart.dev/get-started/sdk)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Serverpod CLI](https://docs.serverpod.dev/getting-started/install-cli)
+
+### 1. Installation & Dependency Setup
+
+Run `pub get` in all modules to fetch dependencies:
+
+```bash
+# Get dependencies for the client
+cd iotg_client
+dart pub get
+
+# Get dependencies for the server
+cd ../iotg_server
+dart pub get
+
+# Get dependencies for the flutter app
+cd ../iotg_flutter
+flutter pub get
+```
+
+### 2. Configuration & Security
+
+To run the project, you need to configure your API keys in the server's `passwords.yaml`. **Never commit this file.**
+
+1.  Navigate to `iotg_server/config/`.
+2.  Open (or create) `passwords.yaml`.
+3.  Add the following keys:
+
+```yaml
+# iotg_server/config/passwords.yaml
+elasticsearchApiKey: "your_elasticsearch_api_key"
+geminiApiKey: "your_gemini_api_key"
+```
+
+### 3. Start Backend & Run
+
+Navigate to the server directory and start the services:
+
+```bash
+cd iotg_server
+docker compose up --build --detach
+dart run bin/main.dart --apply-migrations
+```
+
+Then, run the mobile app:
+
+```bash
+cd ../iotg_flutter
+flutter run
+```
+
+---
+*Built with ❤️ for the Modern SRE.*
