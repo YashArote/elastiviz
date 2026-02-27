@@ -11,8 +11,8 @@
 
 ## 🏗️ Architecture
 
-![Elastiviz Architecture Placeholder](docs/architecture.png)
-*Architecture: Flutter Frontend <-> Serverpod Backend <-> Elasticsearch (ES|QL) / Postgres / Redis*
+<img width="1140" height="1206" alt="elastiviz_arch" src="https://github.com/user-attachments/assets/31efec61-babd-4a5f-b72e-0c82ca30c9d1" />
+
 
 ## 🛠️ Tech Stack
 
