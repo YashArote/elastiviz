@@ -13,7 +13,10 @@
 ## 🏗️ Architecture
 
 <img width="1140" height="1206" alt="elastiviz_arch" src="https://github.com/user-attachments/assets/31efec61-babd-4a5f-b72e-0c82ca30c9d1" />
-(Elastiviz uses custom MCP endpoints which use ESQL api to execute queries because observability project dosen't support creating agents using agent builder)
+
+(Note:-
+1. Elastiviz uses custom MCP endpoints which use ESQL api to execute queries because observability project dosen't support creating agents using agent builder
+2. Current implementation works only for kubernetes data that comes to  elastic's observability endpoint, but with some enhancements it can be generalized to work with any data, following similar architecture.)  
 
 ## 🛠️ Tech Stack
 
