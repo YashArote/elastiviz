@@ -48,16 +48,9 @@ redis:
 maxRequestSize: 524288 # The maximum size of requests allowed in bytes
 
 # Elasticsearch Cloud (Serverless) configuration
-# Replace the placeholder values with your actual Elastic Cloud endpoint.
-elasticsearch:
-  url: 'https://my-observability-project-cb9415.es.us-central1.gcp.elastic.cloud'
-  # API key is stored in passwords.yaml under key: elasticsearchApiKey
+# The URL and API Key must be configured in passwords.yaml
+# Keys: observabilityUrl, observabilityApiKey
 
-# LLM configuration (Gemini)
-llm:
-  provider: gemini
-  model: gemini-1.5-flash
-  # API key is stored in passwords.yaml under key: geminiApiKey
 
 # Schema ingestion settings
 schemaIngestor:
@@ -67,10 +60,9 @@ schemaIngestor:
 # Create an inference endpoint in Kibana → Stack Management → ML → Inference Endpoints
 # Then set the inference ID here (e.g. "my-observability-agent")
 elastic:
-  # Kibana URL for the Serverless Elasticsearch project
-  kibanaUrl: 'https://iotg-b3fc4e.kb.us-central1.gcp.elastic.cloud'
-  # Agent ID — set this after creating your agent in Kibana Agent Builder UI
-  agentId: 'iotg-observability-agent'
+  # The URL, API Key, and Agent ID for Kibana must be configured in passwords.yaml
+  # Keys: kibanaUrl, kibanaApiKey, agentId
+
   # Public URL where Serverpod is accessible (for Agent Builder tool webhooks)
   # Use ngrok or your deployed URL: e.g. https://abc123.ngrok.io
   toolWebhookBaseUrl: 'http://localhost:8080'

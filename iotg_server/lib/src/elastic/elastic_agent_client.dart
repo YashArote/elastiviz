@@ -19,18 +19,30 @@ import 'package:serverpod/serverpod.dart';
 /// agent remembers prior context (which pod was discussed, what was asked, etc.)
 class ElasticAgentClient {
   final Session _session;
-  final String _kibanaUrl;
-  final String _agentId;
 
-  ElasticAgentClient(this._session)
-    : _kibanaUrl = const String.fromEnvironment(
-        'KIBANA_URL',
-        defaultValue: 'https://iotg-b3fc4e.kb.us-central1.gcp.elastic.cloud',
-      ),
-      _agentId = const String.fromEnvironment(
-        'ELASTIC_AGENT_ID',
-        defaultValue: 'iotg-observability-agent',
+  ElasticAgentClient(this._session);
+
+  String get _agentId {
+    final id = _session.passwords['agentId'] ?? '';
+    if (id.isEmpty) {
+      _session.log(
+        'WARNING: agentId is not set in passwords.yaml',
+        level: LogLevel.warning,
       );
+    }
+    return id;
+  }
+
+  String get _kibanaUrl {
+    final url = _session.passwords['kibanaUrl'] ?? '';
+    if (url.isEmpty) {
+      _session.log(
+        'WARNING: kibanaUrl is not set in passwords.yaml',
+        level: LogLevel.warning,
+      );
+    }
+    return url;
+  }
 
   // ─── Public API ─────────────────────────────────────────────────────────────
 

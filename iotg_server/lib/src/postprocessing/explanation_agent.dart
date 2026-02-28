@@ -1,23 +1,13 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import '../agents/metric_resolver.dart';
 
-/// Explanation Agent — uses Gemini to produce a grounded, factual explanation.
+/// Explanation Agent — generates a grounded, factual explanation using local logic.
 ///
-/// The LLM receives:
+/// This agent analyzes:
 ///   - Entity name and type (human-readable)
 ///   - Summary stats  (min, max, avg) per metric using display names
 ///   - List of detected anomalies with severity + reason
-///
-/// The LLM NEVER sees: ECS field paths, index names, datasets, ES|QL.
 class ExplanationAgent {
-  final Session _session;
-
-  ExplanationAgent(this._session);
-
   /// Generic explanation — called by the new Elastic Agent Builder pipeline.
   /// Takes raw field path stats + anomaly list directly.
   Future<String> explainGeneric({
@@ -29,49 +19,18 @@ class ExplanationAgent {
     required List<AnomalyEntry> anomalies,
     String esql = '', // used to detect nanocores in STATS queries
   }) async {
-    final apiKey =
-        _session.passwords['geminiApiKey'] ?? 'PLACEHOLDER_GEMINI_API_KEY';
-
     final metricSummary = _buildMetricSummaryFromPaths(
       rows,
       metricNames,
       esql: esql,
     );
-    final anomalySummary = _buildAnomalySummary(anomalies);
 
-    final prompt =
-        '''You are an infrastructure observability expert.
-Write a concise, factual, 2-4 sentence explanation for what you see in this monitoring data.
-
-Observation context:
-- Resource: $entityName ($entityType)
-- Time window: $timeWindow
-
-Metric summary:
-$metricSummary
-
-${anomalySummary.isNotEmpty ? 'Detected anomalies:\n$anomalySummary' : 'No anomalies detected.'}
-
-Rules:
-- Be factual — only describe what is in the data
-- Do NOT mention field paths, database names, queries, or schema terms
-- Use human-readable names (CPU Usage, Memory Usage) — never ECS field paths
-- Keep it to 2-4 sentences, plain English only''';
-
-    try {
-      return await _callGemini(apiKey, prompt);
-    } catch (e) {
-      _session.log(
-        '[ExplanationAgent] explainGeneric failed: $e',
-        level: LogLevel.warning,
-      );
-      return _fallbackExplanation(
-        entityName,
-        entityType,
-        metricSummary,
-        anomalies,
-      );
-    }
+    return _fallbackExplanation(
+      entityName,
+      entityType,
+      metricSummary,
+      anomalies,
+    );
   }
 
   /// Legacy: explain() using ResolvedMetric list (old pipeline).
@@ -81,48 +40,17 @@ Rules:
     required List<ResolvedMetric> metrics,
     required List<AnomalyEntry> anomalies,
   }) async {
-    final apiKey =
-        _session.passwords['geminiApiKey'] ?? 'PLACEHOLDER_GEMINI_API_KEY';
-
     final entityName = plan['entity_name'] as String;
     final entityType = plan['entity_type'] as String;
-    final timeWindow = plan['time_window'] as String? ?? '30m';
 
     final metricSummary = _buildMetricSummary(rows, metrics);
-    final anomalySummary = _buildAnomalySummary(anomalies);
 
-    final prompt =
-        '''You are an observability expert.
-Write a concise, factual, 2-4 sentence explanation for what you see in this monitoring data.
-
-Observation context:
-- Resource: $entityName ($entityType)
-- Time window: $timeWindow
-
-Metric summary:
-$metricSummary
-
-${anomalySummary.isNotEmpty ? 'Detected anomalies:\n$anomalySummary' : 'No anomalies detected.'}
-
-Rules:
-- Be factual — only describe what is in the data
-- Do NOT mention field paths, database names, query languages, or schema terms
-- Keep it to 2-4 sentences, plain English''';
-
-    try {
-      return await _callGemini(apiKey, prompt);
-    } catch (e) {
-      _session.log(
-        '[ExplanationAgent] Failed: $e',
-        level: LogLevel.warning,
-      );
-      return _fallbackExplanation(
-        entityName,
-        entityType,
-        metricSummary,
-        anomalies,
-      );
-    }
+    return _fallbackExplanation(
+      entityName,
+      entityType,
+      metricSummary,
+      anomalies,
+    );
   }
 
   String _buildMetricSummary(
@@ -234,20 +162,6 @@ Rules:
     return '${val.toStringAsFixed(2)} $unit';
   }
 
-  String _buildAnomalySummary(List<AnomalyEntry> anomalies) {
-    if (anomalies.isEmpty) return '';
-    final sb = StringBuffer();
-    for (final a in anomalies.take(5)) {
-      sb.writeln(
-        '- [${a.severity.toUpperCase()}] ${a.metric} at ${a.timestamp}: ${a.reason}',
-      );
-    }
-    if (anomalies.length > 5) {
-      sb.writeln('- ... and ${anomalies.length - 5} more anomalies');
-    }
-    return sb.toString().trim();
-  }
-
   String _fallbackExplanation(
     String entityName,
     String entityType,
@@ -287,7 +201,7 @@ Rules:
           .join('; ');
       sb.write('$summaries. ');
     }
-    if (anomalies.isNotEmpty) {
+    /* if (anomalies.isNotEmpty) {
       final high = anomalies.where((a) => a.severity == 'high').length;
       final med = anomalies.where((a) => a.severity == 'medium').length;
       final parts = <String>[];
@@ -296,45 +210,7 @@ Rules:
       sb.write('${parts.join(' and ')} anomalies were detected.');
     } else {
       sb.write('No anomalies were detected in this time window.');
-    }
+    }*/
     return sb.toString();
-  }
-
-  Future<String> _callGemini(String apiKey, String prompt) async {
-    final uri = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey',
-    );
-    final body = jsonEncode({
-      'contents': [
-        {
-          'role': 'user',
-          'parts': [
-            {'text': prompt},
-          ],
-        },
-      ],
-      'generationConfig': {
-        'temperature': 0.3,
-        'maxOutputTokens': 200,
-      },
-    });
-
-    final response = await http.post(
-      uri,
-      headers: {HttpHeaders.contentTypeHeader: 'application/json'},
-      body: body,
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception(
-        'Gemini explanation error [${response.statusCode}]: ${response.body}',
-      );
-    }
-
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    final candidates = (data['candidates'] as List?) ?? [];
-    if (candidates.isEmpty) return '';
-    final parts = (candidates.first['content']['parts'] as List?) ?? [];
-    return (parts.firstOrNull?['text'] as String? ?? '').trim();
   }
 }

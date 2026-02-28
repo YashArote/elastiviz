@@ -103,9 +103,9 @@ class ObservabilityPipeline {
     final anomalies = AnomalyDetector().detectFromRows(rows, metricNames);
     _session.log('[Pipeline] Detected ${anomalies.length} anomalies');
 
-    // ── Steps 3+4: Gemini explanation and chart JSON run concurrently ──────────
+    // ── Steps 3+4: Fallback explanation and chart JSON run concurrently ──────────
     // Both only need rows+metricNames+anomalies — no dependency between them.
-    final explanationFuture = ExplanationAgent(_session).explainGeneric(
+    final explanationFuture = ExplanationAgent().explainGeneric(
       entityName: entityName,
       entityType: entityType,
       timeWindow: timeWindow,

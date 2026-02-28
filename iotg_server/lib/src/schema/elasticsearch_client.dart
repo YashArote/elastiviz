@@ -17,14 +17,17 @@ class ElasticsearchClient {
 
   /// Factory that reads credentials from Serverpod session passwords.
   factory ElasticsearchClient.fromSession(Session session) {
-    // URL read from environment or config placeholder
-    final url = const String.fromEnvironment(
-      'ES_URL',
-      defaultValue:
-          'https://my-observability-project-cb9415.es.us-central1.gcp.elastic.cloud',
-    );
+    // Read URL from session passwords, fallback to empty string if misconfigured
+    final url = session.passwords['observabilityUrl'] ?? '';
+    if (url.isEmpty) {
+      session.log(
+        'WARNING: observabilityUrl is not set in passwords.yaml',
+        level: LogLevel.warning,
+      );
+    }
+
     final apiKey =
-        session.passwords['elasticsearchApiKey'] ??
+        session.passwords['observabilityApiKey'] ??
         'REMOVED_SECRET==';
     return ElasticsearchClient(baseUrl: url, apiKey: apiKey);
   }

@@ -50,19 +50,30 @@ flutter pub get
 
 ### 2. Configuration & Security
 
-To run the project, you need to configure your API keys in the server's `passwords.yaml`. **Never commit this file.**
+To run the project, you need to configure your Elastic URLs and API keys in the server's `passwords.yaml`. **Never commit this file.**
 
 1.  Navigate to `iotg_server/config/`.
 2.  Open (or create) `passwords.yaml`.
-3.  Add the following keys:
+3.  Add the following configuration:
 
 ```yaml
 # iotg_server/config/passwords.yaml
-elasticsearchApiKey: "your_elasticsearch_api_key"
-geminiApiKey: "your_gemini_api_key"
+development:
+  # --- Elastiviz Observability Configuration (Hackathon Instance) ---
+  observabilityUrl: 'https://my-observability-project-cb9415.es.us-central1.gcp.elastic.cloud'
+  observabilityApiKey: 'your_observability_api_key'
+  kibanaUrl: 'https://iotg-b3fc4e.kb.us-central1.gcp.elastic.cloud'
+  kibanaApiKey: 'your_kibana_api_key'
+  agentId: 'iotg-observability-agent'
 ```
 
-### 3. Start Backend & Run
+### 3. Agent Configuration
+
+See [`agent_setup.md`](agent_setup.md) for the exact System Prompt and Tool Webhooks you need to configure in the Kibana Agent Builder UI. Once created, paste the generated Agent ID into your `passwords.yaml` as shown above.
+
+### 4. Database Migrations
+
+### 5. Start Backend & Run
 
 Navigate to the server directory and start the services:
 

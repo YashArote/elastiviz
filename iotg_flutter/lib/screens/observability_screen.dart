@@ -4,9 +4,8 @@ import '../providers/observability_provider.dart';
 import '../widgets/chat_bubble.dart';
 import '../widgets/conversation_history_drawer.dart';
 
-/// Main observability screen — a chat-driven interface for querying
-/// Kubernetes metrics via natural language, backed by the Elastic Agent
-/// Builder + Gemini pipeline.
+/// Screen to interact with the Observability assistant.
+/// Uses the Elastiviz pipeline.
 class ObservabilityScreen extends StatefulWidget {
   const ObservabilityScreen({super.key});
 
