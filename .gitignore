@@ -26,7 +26,6 @@ app/release/
 *.perspectivev3
 **/ios/Runner/GeneratedPluginRegistrant.h
 **/ios/Runner/GeneratedPluginRegistrant.m
-
 # Serverpod / Config
 **/config/passwords.yaml
 **/config/firebase_service_account_key.json
@@ -45,3 +44,4 @@ Thumbs.db
 
 # Misc
 *.log
+replacements.txt
