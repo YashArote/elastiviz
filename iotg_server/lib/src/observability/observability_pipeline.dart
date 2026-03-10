@@ -47,11 +47,12 @@ class ObservabilityPipeline {
         '[Pipeline] Agent returned REF:LAST_RUN. Resolving from cache...',
       );
 
-      // Primary lookup: By ESQL string (most reliable)
-      var cached = esql.isNotEmpty ? AgentResultCache.retrieve(esql) : null;
+      // Primary lookup: By conversation ID — always stored by MCP run_esql.
+      // (The agent no longer returns the esql string in its final JSON.)
+      var cached = AgentResultCache.retrieve(returnedConversationId);
 
-      // Secondary fallback: By conversation ID
-      cached ??= AgentResultCache.retrieve(returnedConversationId);
+      // Secondary fallback: By ESQL string (if agent still includes it)
+      cached ??= esql.isNotEmpty ? AgentResultCache.retrieve(esql) : null;
 
       if (cached == null) {
         _session.log(

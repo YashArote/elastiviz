@@ -561,6 +561,7 @@ Returns: { "rows": [...], "count": N }.
     Map<String, dynamic> args,
   ) async {
     final esql = args['esql'] as String? ?? '';
+    final conversationId = args['conversation_id'] as String? ?? '';
     if (esql.isEmpty) {
       return _toolError(id, 'esql is required');
     }
@@ -568,16 +569,16 @@ Returns: { "rows": [...], "count": N }.
     final rows = await client.runEsql(esql);
     session.log('[McpToolRoute/run_esql] ${rows.length} rows returned');
 
-    // Cap rows sent to the agent: 1000 raw rows blows the LLM context window.
-    // Downsample to ≤300 evenly-spaced rows; the pipeline still gets full data
-    // via the agent's final JSON, which re-embeds only these sampled rows.
-    // Cache the result for "REF:LAST_RUN" optimization
-    if (esql.isNotEmpty) {
-      AgentResultCache.store(esql, rows);
+    // Cache the result by BOTH the esql string AND the conversation_id.
+    // The pipeline's primary lookup uses conversation_id (since the agent no
+    // longer returns the esql field in its final JSON).
+    AgentResultCache.store(esql, rows);
+    if (conversationId.isNotEmpty) {
+      AgentResultCache.store(conversationId, rows);
     }
 
     return _toolSuccess(id, {
-      'rows': rows,
+      'rows': 'REF:LAST_RUN',
       'count': rows.length,
       'sampled': rows.length,
     });

@@ -95,6 +95,16 @@ class ElasticAgentClient {
 
     _session.log('[AgentBuilder] Response status: ${response.statusCode}');
 
+    if (response.statusCode == 404 && conversationId != null) {
+      _session.log(
+        '[AgentBuilder] WARNING: Conversation $conversationId not found (404). '
+        'It was likely deleted in Kibana. Retrying as a fresh conversation.',
+        level: LogLevel.warning,
+      );
+      // Recursively retry once without the broken conversation ID
+      return chat(userQuery, conversationId: null);
+    }
+
     if (response.statusCode != 200) {
       throw Exception(
         'Elastic Agent Builder error [${response.statusCode}]: ${response.body}',
@@ -202,26 +212,66 @@ class ElasticAgentClient {
 
   Map<String, dynamic> _parseAgentOutput(String output) {
     final trimmed = output.trim();
-    // Agent is instructed to return JSON — extract it
-    final start = trimmed.indexOf('{');
-    final end = trimmed.lastIndexOf('}');
-    if (start == -1 || end == -1) {
-      return {
-        'status': 'error',
-        'error_message': 'Agent returned non-JSON response: $trimmed',
-        'rows': [],
-      };
+
+    // First, try a standard substring extraction
+    int start = trimmed.indexOf('{');
+    int end = trimmed.lastIndexOf('}');
+
+    if (start != -1 && end != -1) {
+      try {
+        final parsed = jsonDecode(trimmed.substring(start, end + 1));
+        if (parsed is Map<String, dynamic> && parsed.containsKey('status')) {
+          return parsed;
+        }
+      } catch (_) {
+        // Fall back to regex if standard parsing fails
+      }
     }
-    try {
-      return jsonDecode(trimmed.substring(start, end + 1))
-          as Map<String, dynamic>;
-    } catch (e) {
-      return {
-        'status': 'error',
-        'error_message': 'Failed to parse agent JSON: $e\nRaw: $trimmed',
-        'rows': [],
-      };
+
+    // Violent regex extraction: look for a JSON object containing "status"
+    // This handles cases where Claude outputs something like:
+    // "Here is the data you requested:\n```json\n{ ... }\n```\nHope this helps!"
+    final jsonRegex = RegExp(
+      r'\{[^{}]*"status"\s*:\s*(?:"success"|"error")[^{}]*\}',
+      dotAll: true,
+    );
+    final match = jsonRegex.firstMatch(trimmed);
+
+    if (match != null) {
+      try {
+        final parsed = jsonDecode(match.group(0)!);
+        if (parsed is Map<String, dynamic>) {
+          return parsed;
+        }
+      } catch (_) {
+        // Ignore and fall through to error
+      }
     }
+
+    // If we've exhausted all options, let's try an even wider regex that just looks for
+    // any JSON object that looks vaguely like our schema
+    final schemaRegex = RegExp(
+      r'\{.*"chart_type".*"intent".*"plan".*\}',
+      dotAll: true,
+    );
+    final schemaMatch = schemaRegex.firstMatch(trimmed);
+    if (schemaMatch != null) {
+      try {
+        final parsed = jsonDecode(schemaMatch.group(0)!);
+        if (parsed is Map<String, dynamic>) {
+          return parsed;
+        }
+      } catch (_) {
+        // Ignore and fall through to error
+      }
+    }
+
+    return {
+      'status': 'error',
+      'error_message':
+          'Agent returned non-JSON response or failed to parse: $trimmed',
+      'rows': [],
+    };
   }
 }
 
