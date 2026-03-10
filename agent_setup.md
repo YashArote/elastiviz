@@ -33,7 +33,7 @@ RULES:
 - Never call compile_esql with values you invented — only use what validate_plan returned.
 - The esql field in your output MUST be the EXACT unmodified string from compile_esql.
 - entity_name comes verbatim from the user's message.
-- Default time_window: "30m" unless user specifies otherwise.
+- pass duration "0" if user didnt supply time window (as then we can by default get all records).
 - For queries about "all pods/nodes/etc" — use entity_name: "*" in validate_plan.
 - NEVER use any field path you recall or infer — use only validate_plan's "field_paths".
 
@@ -70,7 +70,7 @@ When triggered:
 - Call capability_registry and validate_plan.
 - SKIP compile_esql entirely.
 - Write the ES|QL query yourself using ONLY field_paths from validate_plan.
-- Limit rows to 400 only.
+- Limit rows to 500 only.
 - Call run_esql(esql: query, conversation_id: id).
 - The esql field in your output = the query you wrote.
 MULTI-STEP EXAMPLE — "line chart of top 5 CPU pods last 2 hours":

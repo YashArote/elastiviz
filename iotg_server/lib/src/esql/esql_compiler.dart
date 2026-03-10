@@ -32,14 +32,14 @@ class EsqlCompiler {
       // '*' / 'all' / empty → show data for all entities.
       if (!isWildcard)
         '| WHERE $filterField == "${_escapeString(filterValue)}"',
-      '| WHERE @timestamp > NOW() - $duration',
+      if (duration != '0') '| WHERE @timestamp > NOW() - $duration',
       // For "all entities" queries, keep the entity field for grouping context
       if (isWildcard)
         '| KEEP $filterField, ${keepFields.join(', ')}'
       else
         '| KEEP ${keepFields.join(', ')}',
       '| SORT @timestamp ASC',
-      '| LIMIT 400',
+      '| LIMIT 500',
     ];
     return lines.join('\n');
   }
@@ -61,7 +61,7 @@ class EsqlCompiler {
     final filterField = entityFilter['field'] as String;
     final filterValue = entityFilter['value'] as String;
     final timeWindow = _parseTimeWindow(
-      plan['time_window'] as String? ?? '30m',
+      plan['time_window'] as String? ?? '0',
     );
 
     final indexPattern = dataset.contains('log')
@@ -78,7 +78,7 @@ class EsqlCompiler {
     return [
       'FROM $indexPattern',
       '| WHERE $filterField == "${_escapeString(filterValue)}"',
-      '| WHERE @timestamp > NOW() - $timeWindow',
+      if (timeWindow != '0') '| WHERE @timestamp > NOW() - $timeWindow',
       '| KEEP ${keepFields.join(',\n       ')}',
       '| SORT @timestamp ASC',
       '| LIMIT 1000',
@@ -87,10 +87,12 @@ class EsqlCompiler {
 
   /// Parses "30m", "1h", "24h" into "30 minutes", "1 hours", etc.
   String _parseTimeWindow(String tw) {
+    if (tw.trim() == '0') return '0';
     final lower = tw.toLowerCase().trim();
     final numStr = lower.replaceAll(RegExp(r'[a-z]'), '');
     final unit = lower.replaceAll(RegExp(r'\d'), '').trim();
     final num = int.tryParse(numStr) ?? 30;
+    if (num == 0) return '0';
     switch (unit) {
       case 'm':
       case 'min':

@@ -63,13 +63,13 @@ To run the project, you need to configure your Elastic URLs and API keys in the 
 # iotg_server/config/passwords.yaml
 development:
   # --- Elastiviz Observability Configuration (Hackathon Instance) ---
-  observabilityUrl: 'https://my-observability-project-cb9415.es.us-central1.gcp.elastic.cloud'
+  observabilityUrl: 'https://elastiviz-de9b85.es.us-central1.gcp.elastic.cloud'
   observabilityApiKey: 'your_observability_api_key'
-  kibanaUrl: 'https://iotg-b3fc4e.kb.us-central1.gcp.elastic.cloud'
+  kibanaUrl: 'https://elastiviz-agent-b7cadb.kb.us-central1.gcp.elastic.cloud'
   kibanaApiKey: 'your_kibana_api_key'
-  agentId: 'iotg-observability-agent'
+  agentId: 'elastiviz-agent'
 ```
-
+The urls and agentId used above are of my actual project, please use them for hackathon
 ### 3. Agent Configuration
 
 See [`agent_setup.md`](agent_setup.md) for the exact System Prompt and Tool Webhooks you need to configure in the Kibana Agent Builder UI. Once created, paste the generated Agent ID into your `passwords.yaml` as shown above.

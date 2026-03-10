@@ -146,9 +146,9 @@ class McpToolRoute extends Route {
         {
           'name': 'capability_registry',
           'description':
-              'Returns the Elasticsearch capability registry — the list of '
-              'observable entity types (pod, node, service …) and the metrics '
-              'available for each.',
+              '''Returns all observable entity types (pod, node, namespace, service, container) 
+and their available metric categories. Call this first before any other tool. 
+No inputs required.''',
           'inputSchema': {
             'type': 'object',
             'properties': <String, dynamic>{},
@@ -157,11 +157,11 @@ class McpToolRoute extends Route {
         },
         {
           'name': 'validate_plan',
-          'description':
-              'Validates an observability investigation plan. Checks that the '
-              'requested entity_type and metrics exist in the registry, resolves '
-              'ECS field paths from MetricDictionary, and returns the index '
-              'pattern and filter needed to build a query.',
+          'description': '''
+Validates intent and resolves exact ECS field paths and index patterns.
+Inputs: entity_type (string), entity_name (string), metrics (string[]), time_window (string, optional).
+Returns: index_pattern, entity_filter {field, value}, field_paths[], dataset.
+If valid=false, stop and return an error to the user.''',
           'inputSchema': {
             'type': 'object',
             'properties': {
@@ -190,9 +190,12 @@ class McpToolRoute extends Route {
         },
         {
           'name': 'compile_esql',
-          'description':
-              'Compiles a deterministic ES|QL query string from the resolved '
-              'field paths returned by validate_plan. Never touches an LLM.',
+          'description': '''
+Builds a deterministic ES|QL query string. Do NOT write ES|QL yourself.
+Inputs: index_pattern, entity_filter_field, entity_filter_value, metric_field_paths (string[]), time_window.
+Use exact values returned by validate_plan — do not modify them.
+Returns: { "esql": "FROM ... | WHERE ... | KEEP ... | SORT ... | LIMIT 1000" }
+''',
           'inputSchema': {
             'type': 'object',
             'properties': {
@@ -238,7 +241,11 @@ class McpToolRoute extends Route {
             'properties': {
               'esql': {
                 'type': 'string',
-                'description': 'The complete ES|QL query string to execute.',
+                'description':
+                    '''Executes the ES|QL query against Elasticsearch and returns all data rows.
+Input: esql (string) — use the EXACT string from compile_esql, character for character.
+Returns: { "rows": [...], "count": N }.
+''',
               },
             },
             'required': ['esql'],
